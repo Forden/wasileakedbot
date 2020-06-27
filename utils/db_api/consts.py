@@ -1,9 +1,13 @@
 import asyncio
-from typing import Optional, Dict, Any, Union, List
+from typing import List, Optional, Type, TypeVar, Union
 
 import aiomysql
+from loguru import logger
 
 from data import config
+from . import misc
+
+T = TypeVar("T")
 
 
 class RawConnection:
@@ -15,24 +19,22 @@ class RawConnection:
             params: Union[tuple, List[tuple]] = None,
             fetch: bool = False,
             mult: bool = False,
-            retries_count: int = 5
-    ) -> Optional[Union[List[Dict[str, Any]], Dict[str, Any]]]:
+            retries_count: int = 5,
+            model_type: Type[T] = None
+    ) -> Optional[Union[List[T], T]]:
         if RawConnection.connection_pool is None:
             RawConnection.connection_pool = await aiomysql.create_pool(**config.mysql_info)
         async with RawConnection.connection_pool.acquire() as conn:
-            conn: aiomysql.Connection = conn
+            conn: aiomysql.Connection
             async with conn.cursor(aiomysql.DictCursor) as cur:
-                cur: aiomysql.DictCursor = cur
+                cur: aiomysql.DictCursor
                 for i in range(retries_count):
                     try:
                         if isinstance(params, list):
                             await cur.executemany(sql, params)
                         else:
                             await cur.execute(sql, params)
-                    except aiomysql.OperationalError as e:
-                        if 'Deadlock found' in str(e):
-                            await asyncio.sleep(1)
-                    except aiomysql.InternalError as e:
+                    except (aiomysql.OperationalError, aiomysql.InternalError) as e:
                         if 'Deadlock found' in str(e):
                             await asyncio.sleep(1)
                     else:
@@ -42,6 +44,13 @@ class RawConnection:
                         r = await cur.fetchall()
                     else:
                         r = await cur.fetchone()
-                    return r
+                    if model_type is not None:
+                        try:
+                            return misc.convert_to_model(r, model_type)
+                        except Exception as e:
+                            logger.error(e)
+                            return r
+                    else:
+                        return r
                 else:
                     await conn.commit()

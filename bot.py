@@ -1,5 +1,4 @@
 from aiogram import Bot, Dispatcher, types
-from aiogram.contrib.fsm_storage.redis import RedisStorage2
 from aiohttp import web
 from loguru import logger
 
@@ -9,8 +8,7 @@ import middlewares
 from data import config
 
 bot = Bot(token=config.BOT_TOKEN, parse_mode=types.ParseMode.HTML)
-storage = RedisStorage2(**config.aiogram_redis)
-dp = Dispatcher(bot, storage=storage)
+dp = Dispatcher(bot)
 
 
 # noinspection PyUnusedLocal
@@ -39,4 +37,4 @@ if __name__ == '__main__':
     app = web.Application()
     app.on_startup.append(on_startup)
     app.add_routes([web.post(config.WEBHOOK_PATH, execute)])
-    web.run_app(app, port=5151, host='localhost')
+    web.run_app(app, port=5156, host='localhost')

@@ -1,9 +1,11 @@
 FROM python:3.7-slim
 
-WORKDIR /botname
+EXPOSE 5156
 
-COPY requirements.txt /botname/
-RUN pip install -r /botname/requirements.txt
-COPY . /botname/
+WORKDIR /wasileakedbot
 
-CMD python3 /botname/bot.py
+COPY requirements.txt /wasileakedbot/
+RUN pip install -r /wasileakedbot/requirements.txt
+COPY . /wasileakedbot/
+
+CMD python3 /wasileakedbot/bot.py

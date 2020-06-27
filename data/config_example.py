@@ -6,8 +6,7 @@ WEBHOOK_URL = f'{BASE_URL}{WEBHOOK_PATH}'
 admins = []
 
 ip = {
-    'db':    '',
-    'redis': '',
+    'db': ''
 }
 
 mysql_info = {
@@ -17,15 +16,4 @@ mysql_info = {
     'db':       '',
     'maxsize':  5,
     'port':     3306,
-}
-
-aiogram_redis = {
-    'host':     ip['redis'],
-    'password': ''
-}
-
-redis = {
-    'address':  (ip['redis'], 6379),
-    'password': '',
-    'encoding': 'utf8'
 }
