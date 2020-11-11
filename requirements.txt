@@ -3,4 +3,4 @@ aiohttp==3.6.2
 aiomysql==0.0.20
 pydantic==1.6
 loguru==0.5.1
-aiogram==2.9.2
+aiogram==2.11.2
